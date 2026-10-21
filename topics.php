@@ -1,40 +1,24 @@
-<?php require ('core/init.php'); ?>
-
 <?php
-//Get Template
+require 'core/init.php';
+
 $topic = new Topic();
-
-$category = isset($_GET["category"]) ? $_GET["category"] : null;
-
-$user = isset($_GET["user"]) ? $_GET["user"] : null;
-
-
+$category = filter_input(INPUT_GET, 'category', FILTER_VALIDATE_INT);
+$userId = filter_input(INPUT_GET, 'user', FILTER_VALIDATE_INT);
+$search = trim((string)($_GET['q'] ?? ''));
 $template = new Template('templates/topics.php');
 
-
-
-if (isset($category)) {
-
-	$template->topics = $topic->getByCategory($category);
-	$template->title = 'Posts In "'.$topic->getCategory($category)['name'].'"';
+if ($category !== null && $category !== false && $category > 0) {
+    $categoryData = $topic->getCategory($category);
+    $template->topics = $topic->getByCategory($category, $search);
+    $template->title = $categoryData ? 'In ' . $categoryData['name'] : 'Explore discussions';
+} elseif ($userId !== null && $userId !== false && $userId > 0) {
+    $template->topics = $topic->getByUser($userId, $search);
+    $template->title = 'Member discussions';
+} else {
+    $template->topics = $topic->getAllTopics($search);
+    $template->title = $search !== '' ? 'Search discussions' : 'Explore discussions';
 }
-
-if (isset($user)) {
-
-	$template->topics = $topic->getByUser($user);
-	//$template->title = 'Posts In "'.$topic->getUser($user)['name'].'"';
-}
-
-
-
-
-if (!isset($category) && !isset($user) ){
-
-	$template->topics = $topic->getAllTopics();
-}
-
-
 
 $template->totalTopics = $topic->getTotalTopics();
-$template->totalCategories= $topic->getTotalCategories();
+$template->totalCategories = $topic->getTotalCategories();
 echo $template;
