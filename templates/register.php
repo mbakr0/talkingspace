@@ -9,7 +9,51 @@
     <div class="col-sm-6"><div class="form-group"><label for="register-password">Password</label><input id="register-password" type="password" name="password" class="form-control" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required></div></div>
     <div class="col-sm-6"><div class="form-group"><label for="register-password-confirm">Confirm password</label><input id="register-password-confirm" type="password" name="password2" class="form-control" placeholder="Repeat password" autocomplete="new-password" minlength="8" required></div></div>
   </div>
-  <div class="form-group"><label for="register-avatar">Profile image <span class="heading-meta">(optional)</span></label><input id="register-avatar" type="file" name="avatar" class="form-control-file" accept="image/jpeg,image/png,image/gif"><small class="heading-meta">JPG, PNG, or GIF · up to 5 MB</small></div>
+  <div class="form-group avatar-upload-group">
+    <label for="register-avatar">Profile image <span class="heading-meta">(optional)</span></label>
+    <div class="avatar-upload" id="avatar-upload">
+      <input id="register-avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/gif" aria-describedby="avatar-help avatar-file-name">
+      <span class="avatar-upload-icon" aria-hidden="true">↑</span>
+      <span class="avatar-upload-copy"><strong>Choose an image</strong><span id="avatar-file-name">No file chosen</span></span>
+      <span class="avatar-upload-action">Browse files</span>
+    </div>
+    <small id="avatar-help" class="heading-meta avatar-upload-help">JPG, PNG, or GIF · up to 5 MB</small>
+    <small id="avatar-error" class="avatar-upload-error" role="alert" hidden></small>
+  </div>
+  <script>
+    (() => {
+      const input = document.getElementById('register-avatar');
+      const filename = document.getElementById('avatar-file-name');
+      const wrapper = document.getElementById('avatar-upload');
+      const error = document.getElementById('avatar-error');
+      if (!input || !filename || !wrapper || !error) return;
+      input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+        error.hidden = true;
+        error.textContent = '';
+        wrapper.classList.remove('has-error');
+        if (!file) {
+          filename.textContent = 'No file chosen';
+          wrapper.classList.remove('has-file');
+          return;
+        }
+        const allowed = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowed.includes(file.type) || file.size > 5 * 1024 * 1024) {
+          error.textContent = file.size > 5 * 1024 * 1024
+            ? 'This image is larger than 5 MB. Choose a smaller file.'
+            : 'Choose a JPG, PNG, or GIF image.';
+          error.hidden = false;
+          wrapper.classList.add('has-error');
+          input.value = '';
+          filename.textContent = 'No file chosen';
+          wrapper.classList.remove('has-file');
+          return;
+        }
+        filename.textContent = file.name;
+        wrapper.classList.add('has-file');
+      });
+    })();
+  </script>
   <div class="form-group"><label for="register-about">A little about you <span class="heading-meta">(optional)</span></label><textarea id="register-about" rows="4" name="about" class="form-control" placeholder="What are you interested in?"></textarea></div>
   <button type="submit" name="register" value="1" class="btn btn-primary btn-block">Create my account <span aria-hidden="true">→</span></button>
   <p class="auth-footnote">Already a member? <a href="<?php echo BASE_URI; ?>login.php">Log in here</a>.</p>
