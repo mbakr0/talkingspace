@@ -14,6 +14,7 @@
           <h2 class="sidebar-title"><span class="title-icon" aria-hidden="true">✦</span>Join the conversation</h2>
           <p class="sidebar-subtitle">Sign in to reply, or create an account to share your own ideas.</p>
           <form class="auth-form" method="post" action="<?php echo BASE_URI; ?>login.php">
+            <input type="hidden" name="csrf_token" value="<?php echo $escape(csrfToken()); ?>">
             <div class="form-group"><label for="sidebar-username">Username</label><input id="sidebar-username" name="username" type="text" class="form-control" placeholder="Your username" autocomplete="username" required></div>
             <div class="form-group"><label for="sidebar-password">Password</label><input id="sidebar-password" name="password" type="password" class="form-control" placeholder="Your password" autocomplete="current-password" required></div>
             <button class="btn btn-primary btn-block" type="submit" name="do_login" value="1">Log in <span aria-hidden="true">→</span></button>
