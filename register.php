@@ -15,7 +15,7 @@ if (isset($_POST['register'])) {
         'password' => (string)($_POST['password'] ?? ''),
         'password2' => (string)($_POST['password2'] ?? ''),
         'about' => trim((string)($_POST['about'] ?? '')),
-        'avatar' => 'noimage.png'
+        'avatar' => 'default-avatar.svg'
     ];
 
     if (!$validate->isRequired(['name','email','username','password','password2'])) {
