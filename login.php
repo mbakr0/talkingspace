@@ -1,21 +1,21 @@
-<?php require ('core/init.php'); ?>
-
 <?php
+require 'core/init.php';
+
 $user = new User();
 
-if (isset($_POST['do_login'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do_login'])) {
+    $username = trim((string)($_POST['username'] ?? ''));
+    $password = (string)($_POST['password'] ?? '');
 
-		$username = $_POST['username'];
-		$password = md5($_POST['password']);
+    if ($username === '' || $password === '') {
+        redirect('login.php', 'Enter both your username and password', 'error');
+    }
 
+    if ($user->login($username, $password)) {
+        redirect('index.php', 'Welcome back! You are now logged in.', 'success');
+    }
 
-		if ($user->login($username,$password)) {
-				
-			redirect("index.php","You have logged in ","success");
-		} else {
+    redirect('login.php', 'We could not sign you in with those details', 'error');
+}
 
-			redirect("index.php","Login Error","error");
-		}
-	} else {
-		redirect("index.php");
-	}
+redirect('index.php');
