@@ -4,6 +4,9 @@ require 'core/init.php';
 $user = new User();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do_login'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        redirect('index.php', 'Your session expired. Please try again.', 'error');
+    }
     $username = trim((string)($_POST['username'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
 
