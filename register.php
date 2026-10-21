@@ -5,6 +5,9 @@ $user = new User();
 $validate = new Validator();
 
 if (isset($_POST['register'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        redirect('register.php', 'Your session expired. Please try again.', 'error');
+    }
     $data = [
         'name' => trim((string)($_POST['name'] ?? '')),
         'email' => trim((string)($_POST['email'] ?? '')),
