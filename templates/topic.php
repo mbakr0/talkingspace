@@ -40,6 +40,7 @@
         <?php if (isLoggedIn()): ?>
           <h3>Add your perspective</h3><p class="form-intro">Be kind, stay on topic, and help make the discussion useful.</p>
           <form method="post" action="<?php echo BASE_URI; ?>topic.php?id=<?php echo (int)$topic['id']; ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo $escape(csrfToken()); ?>">
             <div class="form-group"><label for="reply-body">Your reply</label><textarea id="reply-body" rows="5" name="body" class="form-control" placeholder="Write a thoughtful reply…" maxlength="10000" required></textarea></div>
             <div class="form-actions"><span class="heading-meta">Please keep it respectful.</span><button name="do_reply" value="1" type="submit" class="btn btn-primary">Post reply <span aria-hidden="true">→</span></button></div>
           </form>
