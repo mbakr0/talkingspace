@@ -6,6 +6,7 @@ $user = new User();
 $searchQuery = trim((string)($_GET['q'] ?? ''));
 
 $template = new Template('templates/frontpage.php');
+$template->title = 'Community discussions';
 $template->topics = $topic->getAllTopics($searchQuery);
 $template->totalTopics = $topic->getTotalTopics();
 $template->totalCategories = $topic->getTotalCategories();
