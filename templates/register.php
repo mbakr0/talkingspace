@@ -13,7 +13,7 @@
     <label for="register-avatar">Profile image <span class="heading-meta">(optional)</span></label>
     <div class="avatar-upload" id="avatar-upload">
       <input id="register-avatar" type="file" name="avatar" accept="image/jpeg,image/png,image/gif" aria-describedby="avatar-help avatar-file-name">
-      <span class="avatar-upload-icon" aria-hidden="true">↑</span>
+      <span class="avatar-upload-preview" id="avatar-upload-preview" aria-hidden="true"><span class="avatar-upload-icon">↑</span><img id="avatar-preview-image" alt="" hidden></span>
       <span class="avatar-upload-copy"><strong>Choose an image</strong><span id="avatar-file-name">No file chosen</span></span>
       <span class="avatar-upload-action">Browse files</span>
     </div>
@@ -26,7 +26,15 @@
       const filename = document.getElementById('avatar-file-name');
       const wrapper = document.getElementById('avatar-upload');
       const error = document.getElementById('avatar-error');
-      if (!input || !filename || !wrapper || !error) return;
+      const preview = document.getElementById('avatar-preview-image');
+      let previewUrl = null;
+      if (!input || !filename || !wrapper || !error || !preview) return;
+      const clearPreview = () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+        preview.removeAttribute('src');
+        preview.hidden = true;
+      };
       input.addEventListener('change', () => {
         const file = input.files && input.files[0];
         error.hidden = true;
@@ -35,6 +43,7 @@
         if (!file) {
           filename.textContent = 'No file chosen';
           wrapper.classList.remove('has-file');
+          clearPreview();
           return;
         }
         const allowed = ['image/jpeg', 'image/png', 'image/gif'];
@@ -47,10 +56,15 @@
           input.value = '';
           filename.textContent = 'No file chosen';
           wrapper.classList.remove('has-file');
+          clearPreview();
           return;
         }
         filename.textContent = file.name;
         wrapper.classList.add('has-file');
+        clearPreview();
+        previewUrl = URL.createObjectURL(file);
+        preview.src = previewUrl;
+        preview.hidden = false;
       });
     })();
   </script>
