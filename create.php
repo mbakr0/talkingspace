@@ -7,6 +7,9 @@ if (!isLoggedIn()) {
 }
 
 if (isset($_POST['do_create'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        redirect('create.php', 'Your session expired. Please try again.', 'error');
+    }
     $validate = new Validator();
     $data = [
         'title' => trim((string)($_POST['title'] ?? '')),
