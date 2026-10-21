@@ -12,6 +12,7 @@
 - Account registration and login with password hashing; legacy MD5 hashes are upgraded after a successful login.
 - Topic creation and replies with input validation and prepared SQL statements.
 - Escaped user-generated content to reduce cross-site scripting (XSS) risk.
+- Session-backed CSRF tokens on login, registration, topic creation, replies, and logout.
 - PDO database layer with UTF-8 support, TLS certificate verification, and first-run schema initialization.
 - Vercel PHP entry-point routing for the existing PHP pages.
 - GitHub Actions PHP syntax checks on pushes and pull requests.
@@ -103,7 +104,6 @@ find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l
 ## Potential next steps
 
 - Move avatar uploads to durable object storage.
-- Add CSRF tokens to state-changing forms.
 - Add pagination and rate limiting for larger communities.
 - Introduce versioned database migrations and integration tests.
 - Add moderation tools and member profile pages.
