@@ -47,7 +47,7 @@ $searchQuery = trim((string)($_GET['q'] ?? ''));
             <span class="meta-dot"></span><time><?php echo $escape(formatDate($item['create_date'] ?? 'now')); ?></time>
           </div>
         </div>
-        <span class="reply-pill" title="Replies"><?php echo (int)replyCount($topicId); ?> replies</span>
+        <span class="reply-pill" title="Replies"><?php echo (int)($item['reply_count'] ?? 0); ?> replies</span>
       </li>
     <?php endforeach; ?>
   </ul>
