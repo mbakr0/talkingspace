@@ -35,6 +35,7 @@ $currentUser = getUser();
           <li><a class="nav-link" href="<?php echo BASE_URI; ?>create.php">Start a topic</a></li>
           <li>
             <form method="post" action="<?php echo BASE_URI; ?>logout.php" style="display:inline">
+              <input type="hidden" name="csrf_token" value="<?php echo $escape(csrfToken()); ?>">
               <button class="btn btn-outline-secondary" type="submit" name="do_logout" value="1">Log out</button>
             </form>
           </li>
