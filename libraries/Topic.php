@@ -19,7 +19,8 @@ class Topic
 
     private function fetchTopics($where = '', $bindings = [])
     {
-        $sql = 'SELECT topics.*, users.username, users.avatar, categories.name
+        $sql = 'SELECT topics.*, users.username, users.avatar, categories.name,
+                       (SELECT COUNT(*) FROM replies WHERE replies.topic_id = topics.id) AS reply_count
                 FROM topics
                 INNER JOIN users ON topics.user_id = users.id
                 INNER JOIN categories ON topics.category_id = categories.id ' . $where . '
