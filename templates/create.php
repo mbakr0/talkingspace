@@ -2,6 +2,7 @@
 <?php $escape = static function ($value) { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }; ?>
 <p class="form-intro">Have a question, an idea, or something useful to share? Give your discussion a clear title so others can find it.</p>
 <form method="post" action="<?php echo BASE_URI; ?>create.php">
+  <input type="hidden" name="csrf_token" value="<?php echo $escape(csrfToken()); ?>">
   <div class="form-group">
     <label for="topic-title">Discussion title</label>
     <input id="topic-title" type="text" name="title" class="form-control" placeholder="What would you like to discuss?" maxlength="200" required>
