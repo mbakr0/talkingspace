@@ -1,56 +1,50 @@
-<?php require ('core/init.php'); ?>
-
+<?php require 'core/init.php'; ?>
 <?php
-
 $topic = new Topic();
 $user = new User();
-$validate = new validator();
-
-
-$field_array = array('name','email','username','password','password2');
+$validate = new Validator();
 
 if (isset($_POST['register'])) {
-	
-	$data = array();
-	$data['name'] = $_POST['name'];
-	$data['email'] = $_POST['email'];
-	$data['username'] = $_POST['username'];
-	$data['password'] = md5($_POST['password']);
-	$data['password2'] = md5($_POST['password2']);
-	$data['about'] = $_POST['about'];
+    $data = [
+        'name' => trim((string)($_POST['name'] ?? '')),
+        'email' => trim((string)($_POST['email'] ?? '')),
+        'username' => trim((string)($_POST['username'] ?? '')),
+        'password' => (string)($_POST['password'] ?? ''),
+        'password2' => (string)($_POST['password2'] ?? ''),
+        'about' => trim((string)($_POST['about'] ?? '')),
+        'avatar' => 'noimage.png'
+    ];
 
-	if ($validate->isRequired($field_array)) {
-		if ($validate->isValidEmail($data['email'])) {
-			if ($validate->passwordMatch($data['password'],$data['password2'])) {
-				
-			} else {
-				redirect('register.php','Your Passsword did not match','error');
-			}
-		} else {
-			redirect('register.php','Please Use a vaild email address','error');
-		}
-		
-	} else {
-		redirect('register.php','Please fill in all required field','error');
-	}
+    if (!$validate->isRequired(['name','email','username','password','password2'])) {
+        redirect('register.php', 'Please fill in all required fields', 'error');
+        exit;
+    }
+    if (!$validate->isValidEmail($data['email'])) {
+        redirect('register.php', 'Please use a valid email address', 'error');
+        exit;
+    }
+    if (strlen($data['password']) < 8) {
+        redirect('register.php', 'Password must be at least 8 characters', 'error');
+        exit;
+    }
+    if (!$validate->passwordMatch($data['password'], $data['password2'])) {
+        redirect('register.php', 'Your passwords did not match', 'error');
+        exit;
+    }
 
-	//Uploade avatar Image
-	if ($user->uploadAvatar()) {
-		
-		$data['avatar'] = $_FILES['avatar']['name'];
-	} else {
-		$data['avatar'] = "noimage.png";
-	}
+    if ($user->uploadAvatar()) {
+        $data['avatar'] = $_FILES['avatar']['safe_name'];
+    }
 
-	//Register user
-	if ($user->register($data)) {
-		redirect('index.php','You are registered and can now log in ','Success');
-	} else {
-		redirect('index.php','Something went wrong with registeration ','error');
-	}
+    if ($user->register($data)) {
+        redirect('index.php', 'You are registered and can now log in', 'success');
+        exit;
+    }
+
+    redirect('register.php', 'Username or email is already registered', 'error');
+    exit;
 }
+
 $template = new Template('templates/register.php');
 $template->totalTopics = $topic->getTotalTopics();
-
 echo $template;
-echo $_POST["register"];
