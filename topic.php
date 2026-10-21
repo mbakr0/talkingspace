@@ -7,6 +7,9 @@ $topicId = ($topicId && $topicId > 0) ? $topicId : 0;
 $record = $topicModel->getTopic($topicId);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['do_reply'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        redirect('topic.php?id=' . $topicId . '#reply', 'Your session expired. Please try again.', 'error');
+    }
     if (!isLoggedIn()) {
         redirect('login.php', 'Please log in before replying', 'error');
     }
