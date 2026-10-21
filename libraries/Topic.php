@@ -6,33 +6,50 @@ class Topic
 
     public function __construct() { $this->db = new Database(); }
 
-    public function getAllTopics()
+    private function searchClause($search, &$params)
     {
-        $this->db->query('SELECT topics.*, users.username, users.avatar, categories.name FROM topics
-            INNER JOIN users ON topics.user_id = users.id
-            INNER JOIN categories ON topics.category_id = categories.id
-            ORDER BY create_date DESC');
+        $search = trim((string)$search);
+        if ($search === '') return '';
+        $params[':search_title'] = '%' . $search . '%';
+        $params[':search_body'] = '%' . $search . '%';
+        $params[':search_user'] = '%' . $search . '%';
+        $params[':search_category'] = '%' . $search . '%';
+        return ' AND (topics.title LIKE :search_title OR topics.body LIKE :search_body OR users.username LIKE :search_user OR categories.name LIKE :search_category)';
+    }
+
+    private function fetchTopics($where = '', $bindings = [])
+    {
+        $sql = 'SELECT topics.*, users.username, users.avatar, categories.name
+                FROM topics
+                INNER JOIN users ON topics.user_id = users.id
+                INNER JOIN categories ON topics.category_id = categories.id ' . $where . '
+                ORDER BY topics.create_date DESC, topics.id DESC';
+        $this->db->query($sql);
+        foreach ($bindings as $key => $value) $this->db->bind($key, $value);
         return $this->db->resultset();
     }
 
-    public function getByCategory($category_id)
+    public function getAllTopics($search = '')
     {
-        $this->db->query('SELECT topics.*, users.username, users.avatar, categories.name FROM topics
-            INNER JOIN users ON topics.user_id = users.id
-            INNER JOIN categories ON topics.category_id = categories.id
-            WHERE topics.category_id = :category_id ORDER BY create_date DESC');
-        $this->db->bind(':category_id', (int)$category_id, PDO::PARAM_INT);
-        return $this->db->resultset();
+        $params = [];
+        $clause = $this->searchClause($search, $params);
+        return $this->fetchTopics($clause, $params);
     }
 
-    public function getByUser($id)
+    public function getByCategory($category_id, $search = '')
     {
-        $this->db->query('SELECT topics.*, categories.*, users.username, users.avatar FROM topics
-            INNER JOIN categories ON topics.category_id = categories.id
-            INNER JOIN users ON topics.user_id = users.id
-            WHERE topics.user_id = :id ORDER BY create_date DESC');
-        $this->db->bind(':id', (int)$id, PDO::PARAM_INT);
-        return $this->db->resultset();
+        $params = [':category_id' => (int)$category_id];
+        $clause = 'WHERE topics.category_id = :category_id';
+        $clause .= $this->searchClause($search, $params);
+        return $this->fetchTopics($clause, $params);
+    }
+
+    public function getByUser($id, $search = '')
+    {
+        $params = [':user_id' => (int)$id];
+        $clause = 'WHERE topics.user_id = :user_id';
+        $clause .= $this->searchClause($search, $params);
+        return $this->fetchTopics($clause, $params);
     }
 
     public function getTotalTopics()
@@ -63,17 +80,21 @@ class Topic
 
     public function getTopic($id)
     {
-        $this->db->query('SELECT topics.*, users.username, users.name, users.avatar FROM topics
-            INNER JOIN users ON topics.user_id = users.id WHERE topics.id = :id');
+        $this->db->query('SELECT topics.*, users.username, users.name, users.avatar, categories.name AS category_name
+            FROM topics
+            INNER JOIN users ON topics.user_id = users.id
+            INNER JOIN categories ON topics.category_id = categories.id
+            WHERE topics.id = :id LIMIT 1');
         $this->db->bind(':id', (int)$id, PDO::PARAM_INT);
         return $this->db->single();
     }
 
     public function getReplies($id)
     {
-        $this->db->query('SELECT replies.*, users.* FROM replies
+        $this->db->query('SELECT replies.*, users.username, users.name, users.avatar
+            FROM replies
             INNER JOIN users ON replies.user_id = users.id
-            WHERE replies.topic_id = :id ORDER BY create_date ASC');
+            WHERE replies.topic_id = :id ORDER BY replies.create_date ASC, replies.id ASC');
         $this->db->bind(':id', (int)$id, PDO::PARAM_INT);
         return $this->db->resultset();
     }
