@@ -1,73 +1,59 @@
+<?php
+$title = isset($title) && trim((string)$title) !== '' ? (string)$title : SITE_TITLE;
+$escape = static function ($value) { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); };
+$currentUser = getUser();
+?>
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Starter Template · Bootstrap</title>
-
-    <!-- Bootstrap core CSS -->
- 	<link href="<?php echo BASE_URI;?>templates/css/bootstrap.css" rel="stylesheet">
- 	<link href="<?php echo BASE_URI;?>templates/css/custom.css" rel="stylesheet">
-
-    <!-- Favicons -->
-<meta name="theme-color" content="#563d7c">
-
-
-    <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
-    </style>
-    <!-- Custom styles for this template -->
-    <?php if(!isset($title)){
-      $title = SITE_TITLE;
-    }?>
-  </head>
-      <body>
-      <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="index.php">Talkingspace</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#6558e8">
+  <meta name="description" content="Talkingspace is a community for thoughtful discussions, helpful answers, and shared ideas.">
+  <title><?php echo $escape($title); ?> · Talkingspace</title>
+  <link rel="stylesheet" href="<?php echo BASE_URI; ?>templates/css/bootstrap.css">
+  <link rel="stylesheet" href="<?php echo BASE_URI; ?>templates/css/custom.css">
+</head>
+<body>
+<a class="sr-only sr-only-focusable" href="#main-content">Skip to content</a>
+<nav class="navbar navbar-default navbar-fixed-top" aria-label="Main navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#talkingspace-nav" aria-expanded="false" aria-controls="talkingspace-nav">
+        <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
       </button>
-
-
-      <div class="collapse navbar-collapse" style="justify-content: flex-end;" id="navbarsExampleDefault">
-        <ul class="navbar-nav" style="margin-right: 100px">
-          <li class="nav-item active">
-            <a class="nav-link" href="index.php">Home</a>
+      <a class="navbar-brand" href="<?php echo BASE_URI; ?>">
+        <span class="brand-mark" aria-hidden="true">TS</span>
+        <span class="brand-word">talking<span>space</span></span>
+      </a>
+    </div>
+    <div class="collapse navbar-collapse" id="talkingspace-nav">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a class="nav-link" href="<?php echo BASE_URI; ?>">Explore</a></li>
+        <li><a class="nav-link" href="<?php echo BASE_URI; ?>topics.php">Discussions</a></li>
+        <?php if ($currentUser): ?>
+          <li><a class="nav-link" href="<?php echo BASE_URI; ?>create.php">Start a topic</a></li>
+          <li>
+            <form method="post" action="<?php echo BASE_URI; ?>logout.php" style="display:inline">
+              <button class="btn btn-outline-secondary" type="submit" name="do_logout" value="1">Log out</button>
+            </form>
           </li>
-          <?php if(!isLoggedIn()):?>
-          <li class="nav-item">
-            <a class="nav-link" href="register.php">Create An Account</a>
-          </li>
-        <?php else :?>
-          <li class="nav-item">
-            <a class="nav-link" href="create.php">Create Topic</a>
-          </li>
-        <?php endif;?>
-        </ul>
-      </div>
-
-    </nav>
-
-    <main role="main" class="container">
-      <div class="row">
-        <div class="col-md-8">
-          <div class="main-col">
-            <div class="block">
-              <h2 class="float-left"><?php echo $title;?></h2>
-              <h5 class="float-right">A simple PHP form engine</h5>
-              <div class="clearfix"></div>
-              <hr>
-              <?php displayMessage();?>
+        <?php else: ?>
+          <li><a class="nav-link" href="<?php echo BASE_URI; ?>login.php">Log in</a></li>
+          <li><a class="btn btn-primary" href="<?php echo BASE_URI; ?>register.php">Join the community <span aria-hidden="true">↗</span></a></li>
+        <?php endif; ?>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="app-shell">
+  <div class="row layout-grid">
+    <main id="main-content" class="col-md-8 main-col" tabindex="-1">
+      <section class="block">
+        <header class="page-heading">
+          <span class="heading-kicker">A community for curious minds</span>
+          <h1><?php echo $escape($title); ?></h1>
+          <p>Ask better questions. Share what you know. Learn together.</p>
+        </header>
+        <div class="page-body">
+          <?php displayMessage(); ?>
