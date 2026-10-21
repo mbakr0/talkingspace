@@ -35,3 +35,13 @@ function is_active($category){
 	}
 
 }
+
+/** Resolve a safe avatar path and migrate legacy missing-avatar values to the bundled fallback. */
+function avatarUrl($avatar)
+{
+    $filename = basename((string)$avatar);
+    if ($filename === '' || $filename === 'noimage.png') {
+        $filename = 'default-avatar.svg';
+    }
+    return BASE_URI . 'images/avatars/' . rawurlencode($filename);
+}
