@@ -85,7 +85,7 @@ class Database
                 id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(254) NOT NULL,
-                avatar VARCHAR(255) NOT NULL DEFAULT 'noimage.png',
+                avatar VARCHAR(255) NOT NULL DEFAULT 'default-avatar.svg',
                 username VARCHAR(50) NOT NULL,
                 password VARCHAR(255) NOT NULL,
                 about TEXT NULL,
