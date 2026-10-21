@@ -1,6 +1,7 @@
 <?php include __DIR__ . '/includes/header.php'; ?>
 <p class="form-intro">Create your free account to start discussions, reply to other members, and be part of the community.</p>
 <form class="auth-form" method="post" action="<?php echo BASE_URI; ?>register.php" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="<?php echo $escape(csrfToken()); ?>">
   <div class="form-group"><label for="register-name">Name</label><input id="register-name" type="text" name="name" class="form-control" placeholder="How should we address you?" autocomplete="name" maxlength="100" required></div>
   <div class="form-group"><label for="register-email">Email address</label><input id="register-email" type="email" name="email" class="form-control" placeholder="you@example.com" autocomplete="email" maxlength="254" required></div>
   <div class="form-group"><label for="register-username">Username</label><input id="register-username" type="text" name="username" class="form-control" placeholder="Choose a public username" autocomplete="username" maxlength="50" required></div>
