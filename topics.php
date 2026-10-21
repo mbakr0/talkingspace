@@ -2,7 +2,7 @@
 
 <?php
 //Get Template
-$topic = new topic();
+$topic = new Topic();
 
 $category = isset($_GET["category"]) ? $_GET["category"] : null;
 
