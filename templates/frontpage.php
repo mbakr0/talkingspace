@@ -31,13 +31,12 @@ $searchQuery = trim((string)($_GET['q'] ?? ''));
     <?php foreach ($topics as $item): ?>
       <?php
       $topicId = (int)($item['id'] ?? 0);
-      $avatar = (string)($item['avatar'] ?? 'noimage.png');
-      $avatarPath = BASE_URI . 'images/avatars/' . rawurlencode(basename($avatar));
+      $avatarPath = avatarUrl($item['avatar'] ?? '');
       $bodyText = trim(strip_tags((string)($item['body'] ?? '')));
       $excerpt = function_exists('mb_strimwidth') ? mb_strimwidth($bodyText, 0, 145, '…', 'UTF-8') : substr($bodyText, 0, 145);
       ?>
       <li class="topic-card">
-        <img class="topic-avatar" src="<?php echo $escape($avatarPath); ?>" alt="" loading="lazy" onerror="this.onerror=null;this.src='<?php echo BASE_URI; ?>images/avatars/noimage.png';">
+        <img class="topic-avatar" src="<?php echo $escape($avatarPath); ?>" alt="" loading="lazy" onerror="this.onerror=null;this.src='<?php echo BASE_URI; ?>images/avatars/default-avatar.svg';">
         <div>
           <h3><a href="<?php echo BASE_URI; ?>topic.php?id=<?php echo $topicId; ?>"><?php echo $escape($item['title'] ?? 'Untitled discussion'); ?></a></h3>
           <?php if ($excerpt !== ''): ?><p class="topic-excerpt"><?php echo $escape($excerpt); ?></p><?php endif; ?>
