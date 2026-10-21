@@ -1,18 +1,18 @@
-# Deploying TalkingSpace on Vercel
+# Deploying TalkingSpace
 
-## Before you deploy
+TalkingSpace is a legacy PHP discussion forum with custom routing, sessions, avatar uploads, and a MySQL database. This Vercel setup is a starting point, not proof of a production-ready deployment.
 
-TalkingSpace is a legacy PHP application with custom routing/classes and a database. The included Vercel entry point forwards requests to the repository's existing `index.php`.
+## Required setup
 
-1. Create a hosted MySQL database and import the project's schema/dump. Confirm its tables and columns match the application queries.
-2. Import this GitHub repository into Vercel.
-3. Add the database environment variables expected by the app's database configuration. Confirm the configuration reads `DB_HOST`, `DB_USER`, `DB_PASS`, and `DB_NAME`; if it does not, adapt that config to read them before deployment.
-4. Deploy and test the front page, registration, login/logout, posting topics/replies, and any profile image uploads.
+1. Provision a hosted MySQL database and import the project's schema/data. Confirm table names and columns match the app's queries.
+2. Configure DB_HOST, DB_USER, DB_PASS, and DB_NAME as environment variables. Use a least-privilege database account.
+3. Set BASE_URI to the canonical public URL with a trailing slash, for example https://your-domain.example/.
+4. Deploy and test the home page, registration, login/logout, topic creation, replies, invalid IDs, and duplicate usernames/emails.
 
-## Limitations to check
+## Production limitations to resolve
 
-- This is a legacy PHP app; review compatibility with the selected PHP runtime and replace removed PHP features if required.
-- Vercel's filesystem is not persistent. Use external object storage for profile images/uploads.
-- Test sessions and all database writes after deployment.
-- Do not commit database credentials.
-- This configuration is a starting point; verify Vercel build and function logs and test the app before sharing it publicly.
+- Vercel's filesystem is ephemeral. Uploaded avatars saved under images/avatars will not be reliably persistent; use external object storage before relying on user uploads.
+- Test sessions across multiple requests and instances. File-backed PHP sessions may not be reliable in a serverless deployment; use a supported shared session store if needed.
+- Review the historical Git history for previously committed database credentials. Rotate any credential that was ever committed, even if the current file uses environment variables.
+- Use HTTPS and confirm the database provider's TLS requirements.
+- The repository uses a community PHP runtime. Check build/function logs and run end-to-end tests; do not treat a successful build as a security or runtime audit.
