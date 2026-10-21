@@ -1,75 +1,34 @@
 <?php
 
-function redirect($page = FALSE , $message = null , $message_type = null){
-
-
-		if (is_string($page)) {
-			$location = $page;
-		} else {
-			$location = $_SERVER['SCRIPT_NAME'];
-		}
-
-
-		//Check for massegaes
-		if ($message != null) {
-			$_SESSION['message'] = $message;
-		}
-
-		//Check for type
-		if ($message_type != null) {
-			$_SESSION['message_type'] = $message_type;
-		}
-
-		//Redirect
-		header("Location: ".$location);
-		exit;
-
+function redirect($page = false, $message = null, $message_type = null)
+{
+    $location = is_string($page) ? $page : $_SERVER['SCRIPT_NAME'];
+    if ($message !== null) $_SESSION['message'] = $message;
+    if ($message_type !== null) $_SESSION['message_type'] = $message_type;
+    header('Location: ' . $location);
+    exit;
 }
 
-function displayMessage(){
-
-	if (!empty($_SESSION["message"])) {
-		
-		//Assign Message
-		$message = $_SESSION['message'];
-
-		if(!empty($_SESSION['message_type'])){
-
-			//Assign Type 
-			$message_type = $_SESSION['message_type'];
-
-			//Create Output
-			if ($message_type == "error") {
-				echo "<div class='alert alert-danger'>". $message. "</div>";
-			} else {
-				echo "<div class='alert alert-success'>". $message."</div>";
-			}
-
-		}
-		//Unset messages
-		unset($_SESSION['message']);
-		unset($_SESSION['message_type']);
-		} else {
-			echo "";
-		}
-
-
+function displayMessage()
+{
+    if (empty($_SESSION['message'])) return;
+    $message = htmlspecialchars((string)$_SESSION['message'], ENT_QUOTES, 'UTF-8');
+    $type = ($_SESSION['message_type'] ?? '') === 'error' ? 'danger' : 'success';
+    echo "<div class='alert alert-{$type}'>" . $message . '</div>';
+    unset($_SESSION['message'], $_SESSION['message_type']);
 }
 
+function isLoggedIn()
+{
+    return !empty($_SESSION['is_logged_in']) && !empty($_SESSION['user_id']);
+}
 
-	function isLoggedIn(){
-		if (isset($_SESSION['is_logged_in'])) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	function getUser(){
-		$userArrary = array();
-		$userArrary["user_id"] = $_SESSION["user_id"];
- 		$userArrary["name"] = $_SESSION["name"];
-		$userArrary["username"] = $_SESSION["username"];
-		return $userArrary;
-	}
-
+function getUser()
+{
+    if (!isLoggedIn()) return null;
+    return [
+        'user_id' => $_SESSION['user_id'],
+        'name' => $_SESSION['name'] ?? '',
+        'username' => $_SESSION['username'] ?? ''
+    ];
+}
