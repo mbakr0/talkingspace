@@ -63,6 +63,11 @@ class User
         }
 
         if (!$valid) return false;
+
+        // Rotate the session identifier after authentication to prevent fixation.
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
         $this->setUserData($row);
         return true;
     }
