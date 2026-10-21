@@ -14,7 +14,7 @@
     </header>
     <div class="discussion-body">
       <div class="discussion-author">
-        <img src="<?php echo BASE_URI; ?>images/avatars/<?php echo rawurlencode(basename((string)($topic['avatar'] ?? 'noimage.png'))); ?>" alt="" onerror="this.onerror=null;this.src='<?php echo BASE_URI; ?>images/avatars/noimage.png';">
+        <img src="<?php echo $escape(avatarUrl($topic['avatar'] ?? '')); ?>" alt="" onerror="this.onerror=null;this.src='<?php echo BASE_URI; ?>images/avatars/default-avatar.svg';">
         <div><strong><?php echo $escape($topic['name'] ?? $topic['username'] ?? 'Community member'); ?></strong><span>@<?php echo $escape($topic['username'] ?? 'member'); ?> · Topic author</span></div>
       </div>
       <div class="discussion-content"><?php echo nl2br($escape($topic['body'] ?? '')); ?></div>
@@ -25,7 +25,7 @@
             <?php foreach ($replies as $reply): ?>
               <article class="reply-card">
                 <div class="discussion-author">
-                  <img src="<?php echo BASE_URI; ?>images/avatars/<?php echo rawurlencode(basename((string)($reply['avatar'] ?? 'noimage.png'))); ?>" alt="" loading="lazy" onerror="this.onerror=null;this.src='<?php echo BASE_URI; ?>images/avatars/noimage.png';">
+                  <img src="<?php echo $escape(avatarUrl($reply['avatar'] ?? '')); ?>" alt="" loading="lazy" onerror="this.onerror=null;this.src='<?php echo BASE_URI; ?>images/avatars/noimage.png';">
                   <div><strong><?php echo $escape($reply['name'] ?? $reply['username'] ?? 'Community member'); ?></strong><span>@<?php echo $escape($reply['username'] ?? 'member'); ?> · <?php echo $escape(formatDate($reply['create_date'] ?? 'now')); ?></span></div>
                 </div>
                 <div class="discussion-content"><?php echo nl2br($escape($reply['body'] ?? '')); ?></div>
