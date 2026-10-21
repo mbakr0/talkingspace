@@ -13,11 +13,23 @@ class Database
     {
         $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8mb4';
 
-        // TiDB Cloud requires TLS. Use the runtime's trusted CA bundle where available.
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_PERSISTENT => false,
         ];
+
+        // PHP 8.5 moved MySQL-specific PDO constants to Pdo\\Mysql.
+        // Keep the legacy constants only as a compatibility fallback for older PHP.
+        $mysqlPdoClass = 'Pdo\\Mysql';
+        $sslCaOption = class_exists($mysqlPdoClass) && defined($mysqlPdoClass . '::ATTR_SSL_CA')
+            ? constant($mysqlPdoClass . '::ATTR_SSL_CA')
+            : constant('PDO::MYSQL_ATTR_SSL_CA');
+        $sslCaPathOption = class_exists($mysqlPdoClass) && defined($mysqlPdoClass . '::ATTR_SSL_CAPATH')
+            ? constant($mysqlPdoClass . '::ATTR_SSL_CAPATH')
+            : (defined('PDO::MYSQL_ATTR_SSL_CAPATH') ? constant('PDO::MYSQL_ATTR_SSL_CAPATH') : null);
+        $sslVerifyOption = class_exists($mysqlPdoClass) && defined($mysqlPdoClass . '::ATTR_SSL_VERIFY_SERVER_CERT')
+            ? constant($mysqlPdoClass . '::ATTR_SSL_VERIFY_SERVER_CERT')
+            : constant('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT');
 
         $caPath = getenv('DB_SSL_CA') ?: null;
         if (!$caPath) {
@@ -34,18 +46,18 @@ class Database
         }
 
         if ($caPath && is_file($caPath) && is_readable($caPath)) {
-            $options[PDO::MYSQL_ATTR_SSL_CA] = $caPath;
-        } else {
+            $options[$sslCaOption] = $caPath;
+        } elseif ($sslCaPathOption !== null) {
             foreach (['/etc/ssl/certs', '/etc/pki/tls/certs'] as $candidate) {
                 if (is_dir($candidate) && is_readable($candidate)) {
-                    $options[PDO::MYSQL_ATTR_SSL_CAPATH] = $candidate;
+                    $options[$sslCaPathOption] = $candidate;
                     break;
                 }
             }
         }
 
-        // Do not disable certificate verification.
-        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
+        // Keep server certificate verification enabled.
+        $options[$sslVerifyOption] = true;
 
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
