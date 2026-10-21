@@ -1,40 +1,16 @@
-<?php include("includes/header.php");?>
-
-
-<form role="form" method="post" action="register.php" enctype="multipart/form-data">
-                  <div class="form-group">
-                  	<label>Name*</label>
-                    <input type="text" name="name" class="form-control" placeholder="Enter Your Name">
-                  </div>
-                  <div class="form-group">
-                  	<label>Email Address*</label>
-                    <input type="email" name="email" class="form-control" placeholder="Enter Your Email Address">
-                  </div>
-                  <div>
-                  <label>Chosse Username*</label>
-                    <input type="text" name="username" class="form-control" placeholder="Create A Username">
-                  </div>
-                  <div class="form-group">
-                  	<label>Password*</label>
-                    <input type="password" name="password" class="form-control" placeholder="Enter Password">
-                  </div>
-                  <div>
-                  <label>Confirm Password*</label>
-                    <input type="password" name="password2" class="form-control" placeholder=" Enter Password Again">
-                  </div>
-                  <div class="form-group">
-                      <label class="mt-3">Upload Avatar</label>
-                      <input type="file" name="avatar" class="form-control-file">
-                      <p class="help-block"></p>
-                  </div>
-
-                  <div class="form-group">
-                  	<label>About Me</label>
-                    <textarea type="text" id="about" rows="6" cols="80" name="about" class="form-control" placeholder="Tell us about yourself (optional)"></textarea>
-                  </div>
-                  <input type="submit" name="register" value="Register" class="btn btn-outline-secondary mb-4">
-
-                </form>
-
-           
-<?php include("includes/footer.php");?>
+<?php include __DIR__ . '/includes/header.php'; ?>
+<p class="form-intro">Create your free account to start discussions, reply to other members, and be part of the community.</p>
+<form class="auth-form" method="post" action="<?php echo BASE_URI; ?>register.php" enctype="multipart/form-data">
+  <div class="form-group"><label for="register-name">Name</label><input id="register-name" type="text" name="name" class="form-control" placeholder="How should we address you?" autocomplete="name" maxlength="100" required></div>
+  <div class="form-group"><label for="register-email">Email address</label><input id="register-email" type="email" name="email" class="form-control" placeholder="you@example.com" autocomplete="email" maxlength="254" required></div>
+  <div class="form-group"><label for="register-username">Username</label><input id="register-username" type="text" name="username" class="form-control" placeholder="Choose a public username" autocomplete="username" maxlength="50" required></div>
+  <div class="row">
+    <div class="col-sm-6"><div class="form-group"><label for="register-password">Password</label><input id="register-password" type="password" name="password" class="form-control" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required></div></div>
+    <div class="col-sm-6"><div class="form-group"><label for="register-password-confirm">Confirm password</label><input id="register-password-confirm" type="password" name="password2" class="form-control" placeholder="Repeat password" autocomplete="new-password" minlength="8" required></div></div>
+  </div>
+  <div class="form-group"><label for="register-avatar">Profile image <span class="heading-meta">(optional)</span></label><input id="register-avatar" type="file" name="avatar" class="form-control-file" accept="image/jpeg,image/png,image/gif"><small class="heading-meta">JPG, PNG, or GIF · up to 5 MB</small></div>
+  <div class="form-group"><label for="register-about">A little about you <span class="heading-meta">(optional)</span></label><textarea id="register-about" rows="4" name="about" class="form-control" placeholder="What are you interested in?"></textarea></div>
+  <button type="submit" name="register" value="1" class="btn btn-primary btn-block">Create my account <span aria-hidden="true">→</span></button>
+  <p class="auth-footnote">Already a member? <a href="<?php echo BASE_URI; ?>login.php">Log in here</a>.</p>
+</form>
+<?php include __DIR__ . '/includes/footer.php'; ?>
