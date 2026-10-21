@@ -21,5 +21,4 @@ jobs:
       - name: Lint PHP files
         run: find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l
       - name: Validate Vercel configuration
-        run: php -r '$json = json_decode(file_get_contents("vercel.json"), true, 512, JSON_THROW_ON_ERROR); echo "vercel.json is valid JSON
-";'
+        run: php -r '$json = json_decode(file_get_contents("vercel.json"), true, 512, JSON_THROW_ON_ERROR); echo "vercel.json is valid JSON";'
