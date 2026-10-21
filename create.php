@@ -1,32 +1,36 @@
-<?php require ('core/init.php'); ?>
-
+<?php require 'core/init.php'; ?>
 <?php
-//Get Template
 $topic = new Topic();
-if (isset($_POST['do_create'])) {
-	 	
-	$validate = new Validator();
-	$field_array = array("title","body","category");
 
-	 $data = array();
-	 $data['title'] = $_POST['title'];
-	 $data['body']  = $_POST['body'];
-	 $data['category_id'] = $_POST['category'];
-	 $data['user_id'] = getUser()['user_id'];
-
-	 if ($validate->isRequired($field_array)) {
-	 	if ($topic->create($data)) {
-	 		redirect('index.php','Your topic has been added','success');
-	 	} else {
-	 		redirect('create.php','Your topic has not added','error');
-	 	}
-	 } else {
-	 	redirect('create.php','Please fill in all required field','error');
-	 }
-
-
+if (!isLoggedIn()) {
+    redirect('index.php', 'Please log in before creating a topic', 'error');
 }
+
+if (isset($_POST['do_create'])) {
+    $validate = new Validator();
+    $data = [
+        'title' => trim((string)($_POST['title'] ?? '')),
+        'body' => trim((string)($_POST['body'] ?? '')),
+        'category_id' => filter_var($_POST['category'] ?? null, FILTER_VALIDATE_INT),
+        'user_id' => (int)getUser()['user_id']
+    ];
+
+    if (!$validate->isRequired(['title', 'body', 'category'])) {
+        redirect('create.php', 'Please fill in all required fields', 'error');
+    }
+    if (!$data['category_id']) {
+        redirect('create.php', 'Please select a valid category', 'error');
+    }
+    if (mb_strlen($data['title']) > 200 || mb_strlen($data['body']) > 10000) {
+        redirect('create.php', 'Your topic is too long', 'error');
+    }
+
+    if ($topic->create($data)) {
+        redirect('index.php', 'Your topic has been added', 'success');
+    }
+    redirect('create.php', 'Your topic could not be added', 'error');
+}
+
 $template = new Template('templates/create.php');
 $template->totalTopics = $topic->getTotalTopics();
-
 echo $template;
