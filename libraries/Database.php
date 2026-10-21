@@ -1,100 +1,130 @@
 <?php
 class Database
 {
-		private $host = DB_HOST;  
-		private $user = DB_USER;  
-		private $pass = DB_PASS;  
-		private $dbname = DB_NAME;
+    private $host = DB_HOST;
+    private $user = DB_USER;
+    private $pass = DB_PASS;
+    private $dbname = DB_NAME;
+    private $dbh;
+    private $error;
+    private $stmt;
 
+    public function __construct()
+    {
+        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';charset=utf8mb4';
 
-		private $dbh;  
-		private $error;
-		private $stmt;
+        // TiDB Cloud requires TLS. Use the runtime's trusted CA bundle where available.
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_PERSISTENT => false,
+        ];
 
-		public function __construct(){  
-			// Set DSN  
-				$dsn = 'mysql:host='. $this->host . ';dbname=' . $this->dbname;  
+        $caPath = getenv('DB_SSL_CA') ?: null;
+        if (!$caPath) {
+            foreach ([
+                '/etc/ssl/certs/ca-certificates.crt',
+                '/etc/ssl/cert.pem',
+                '/etc/pki/tls/certs/ca-bundle.crt',
+            ] as $candidate) {
+                if (is_file($candidate) && is_readable($candidate)) {
+                    $caPath = $candidate;
+                    break;
+                }
+            }
+        }
 
+        if ($caPath && is_file($caPath) && is_readable($caPath)) {
+            $options[PDO::MYSQL_ATTR_SSL_CA] = $caPath;
+        } else {
+            foreach (['/etc/ssl/certs', '/etc/pki/tls/certs'] as $candidate) {
+                if (is_dir($candidate) && is_readable($candidate)) {
+                    $options[PDO::MYSQL_ATTR_SSL_CAPATH] = $candidate;
+                    break;
+                }
+            }
+        }
 
-			// Set options  
-			$options = array(PDO::ATTR_PERSISTENT => true,  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);  
+        // Do not disable certificate verification.
+        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
 
+        try {
+            $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
+        } catch (PDOException $e) {
+            error_log('TalkingSpace database connection failed: ' . $e->getMessage());
+            throw new RuntimeException('Database connection failed. Check server configuration.', 0, $e);
+        }
+    }
 
-			// Create a new PDO instanace  
-			try{  
-				$this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
+    public function query($query)
+    {
+        $this->stmt = $this->dbh->prepare($query);
+    }
 
-			}
-			catch (PDOException $e) {
-                error_log('TalkingSpace database connection failed: ' . $e->getMessage());
-                throw new RuntimeException('Database connection failed. Check server configuration.', 0, $e);
-            }  
-		}  
+    public function bind($param, $value, $type = null)
+    {
+        if (is_null($type)) {
+            switch (true) {
+                case is_int($value):
+                    $type = PDO::PARAM_INT;
+                    break;
+                case is_bool($value):
+                    $type = PDO::PARAM_BOOL;
+                    break;
+                case is_null($value):
+                    $type = PDO::PARAM_NULL;
+                    break;
+                default:
+                    $type = PDO::PARAM_STR;
+            }
+        }
 
-		public function query($query){  
-				$this->stmt = $this->dbh->prepare($query);  
-			}  
+        $this->stmt->bindValue($param, $value, $type);
+    }
 
-		public function bind($param, $value, $type = null){
-					if (is_null($type)) {  
-						switch (true) {  
+    public function execute()
+    {
+        return $this->stmt->execute();
+    }
 
-						case is_int($value):
-							$type = PDO::PARAM_INT;  
-							break;  
+    public function resultset()
+    {
+        $this->execute();
+        return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-						case is_bool($value):
-							$type = PDO::PARAM_BOOL; 
-							break;  
-						case is_null($value):  
-							$type = PDO::PARAM_NULL;  
-							break;  
-						default:  
-							$type = PDO::PARAM_STR;  
-						}  
-					} 
+    public function single()
+    {
+        $this->execute();
+        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
-				    $this->stmt->bindValue($param, $value, $type); 
+    public function rowCount()
+    {
+        return $this->stmt->rowCount();
+    }
 
-		}  
+    public function lastInsertId()
+    {
+        return $this->dbh->lastInsertId();
+    }
 
-			public function execute(){  
-				return $this->stmt->execute();  
-			} 
+    public function beginTransaction()
+    {
+        return $this->dbh->beginTransaction();
+    }
 
-			public function resultset(){  
-				$this->execute();  
-				return $this->stmt->fetchAll(PDO::FETCH_ASSOC);  
-			}
+    public function endTransaction()
+    {
+        return $this->dbh->commit();
+    }
 
-			public function single(){  
-				$this->execute();  
-				return $this->stmt->fetch(PDO::FETCH_ASSOC);  
-			}  
+    public function cancelTransaction()
+    {
+        return $this->dbh->rollBack();
+    }
 
-				public function rowCount(){  
-				return $this->stmt->rowCount();  
-			}  
-
-			public function lastInsertId(){  
-				return $this->dbh->lastInsertId();  
-			}  
-
-			public function beginTransaction(){  
-				return $this->dbh->beginTransaction();  
-			}
-
-			public function endTransaction(){  
-				return $this->dbh->commit();  
-			}  
-
-			public function cancelTransaction(){  
-				return $this->dbh->rollBack();  
-			}  
-
-			public function debugDumpParams(){  
-				return $this->stmt->debugDumpParams();  
-			}  
-
-
-} 
+    public function debugDumpParams()
+    {
+        return $this->stmt->debugDumpParams();
+    }
+}
