@@ -61,9 +61,90 @@ class Database
 
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
+            $this->ensureSchema();
         } catch (PDOException $e) {
             error_log('TalkingSpace database connection failed: ' . $e->getMessage());
             throw new RuntimeException('Database connection failed. Check server configuration.', 0, $e);
+        }
+    }
+
+
+    /**
+     * Create the application's tables on first connection when they are missing.
+     * The database account must have CREATE and INSERT privileges.
+     */
+    private function ensureSchema()
+    {
+        static $schemaReady = false;
+        if ($schemaReady) {
+            return;
+        }
+
+        $tables = [
+            "CREATE TABLE IF NOT EXISTS users (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(254) NOT NULL,
+                avatar VARCHAR(255) NOT NULL DEFAULT 'noimage.png',
+                username VARCHAR(50) NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                about TEXT NULL,
+                PRIMARY KEY (id),
+                UNIQUE KEY users_email_unique (email),
+                UNIQUE KEY users_username_unique (username)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+            "CREATE TABLE IF NOT EXISTS categories (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                name VARCHAR(100) NOT NULL,
+                PRIMARY KEY (id),
+                UNIQUE KEY categories_name_unique (name)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+            "CREATE TABLE IF NOT EXISTS topics (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                category_id BIGINT UNSIGNED NOT NULL,
+                user_id BIGINT UNSIGNED NOT NULL,
+                title VARCHAR(200) NOT NULL,
+                body TEXT NOT NULL,
+                create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY topics_category_date_idx (category_id, create_date),
+                KEY topics_user_idx (user_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+            "CREATE TABLE IF NOT EXISTS replies (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                topic_id BIGINT UNSIGNED NOT NULL,
+                user_id BIGINT UNSIGNED NOT NULL,
+                body TEXT NOT NULL,
+                create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                KEY replies_topic_date_idx (topic_id, create_date),
+                KEY replies_user_idx (user_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ];
+
+        try {
+            foreach ($tables as $sql) {
+                $this->dbh->exec($sql);
+            }
+
+            $categoryCount = (int) $this->dbh->query("SELECT COUNT(*) FROM categories")->fetchColumn();
+            if ($categoryCount === 0) {
+                $insert = $this->dbh->prepare("INSERT INTO categories (name) VALUES (?), (?), (?)");
+                $insert->execute([
+                    'General Discussion',
+                    'Questions & Help',
+                    'Ideas & Feedback'
+                ]);
+            }
+
+            $schemaReady = true;
+        } catch (PDOException $e) {
+            error_log('TalkingSpace schema initialization failed: ' . $e->getMessage());
+            throw new RuntimeException(
+                'Database schema initialization failed. Ensure the database user can create tables and insert categories.',
+                0,
+                $e
+            );
         }
     }
 
