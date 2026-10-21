@@ -38,3 +38,11 @@
   .avatar-upload-icon{flex-basis:36px;height:36px}
   .avatar-upload-action{padding:7px 8px;font-size:11px}
 }
+
+/* Live profile image preview */
+.avatar-upload-preview{position:relative;display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;overflow:hidden;border-radius:14px;background:#eeecff;color:var(--brand)}
+.avatar-upload-preview .avatar-upload-icon{display:grid;place-items:center;width:100%;height:100%;flex:initial}
+.avatar-upload-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.avatar-upload-preview img[hidden]{display:none}
+.avatar-upload.has-file .avatar-upload-preview{background:#ddf8ee}
+@media(max-width:480px){.avatar-upload-preview{flex-basis:40px;width:40px;height:40px;border-radius:12px}}
