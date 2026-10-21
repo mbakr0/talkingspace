@@ -78,6 +78,8 @@ On the first database connection, Talkingspace creates the core `users`, `catego
 
 ## Deployment configuration
 
+Use `.env.example` as a reference for the environment variable names. It is a template only; the application does not automatically load it as a dotenv file. Set actual values in your shell or hosting provider, and do not commit credentials.
+
 Set these variables in the deployment environment; do not commit credentials:
 
 - `DB_HOST` — hosted database hostname
