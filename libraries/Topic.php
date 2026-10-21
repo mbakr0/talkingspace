@@ -33,6 +33,7 @@ class Topic
     {
         $params = [];
         $clause = $this->searchClause($search, $params);
+        if ($clause !== '') $clause = 'WHERE ' . substr($clause, 5);
         return $this->fetchTopics($clause, $params);
     }
 
