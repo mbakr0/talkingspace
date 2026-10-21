@@ -25,9 +25,10 @@ class Database
 				$this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
 
 			}
-			catch(PDOException $e){  
-				$this->error = $e->getMessage();
-			}  
+			catch (PDOException $e) {
+                error_log('TalkingSpace database connection failed: ' . $e->getMessage());
+                throw new RuntimeException('Database connection failed. Check server configuration.', 0, $e);
+            }  
 		}  
 
 		public function query($query){  
